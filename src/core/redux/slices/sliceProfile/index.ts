@@ -1,6 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { Dispatch } from "redux";
 import { IProfileState } from "../../../../api/IProfile/ProfileDto";
+import { showErrorNotify } from "../../../../common/components/helpers/errorHelper";
+import { SuccesCode, showSuccesNotify } from "../../../../common/components/helpers/succesHelper";
 
 const initialState: IProfileState = {
   profileLoader: false,
@@ -33,18 +35,18 @@ export function AuthRequest(
     getFirebase: Function
   ) => {
     dispatch(toggleProfileLoader(true));
- 
-        const firebase = getFirebase();
-        firebase
-          .login({ email, password })
-          .then(() => {
-            dispatch(toggleProfileLoader(false));
-          })
-          .catch((error: any) => {
-            dispatch(toggleProfileLoader(false));
-            console.log(error.message);
-          });
-   
+    const firebase = getFirebase();
+    firebase
+      .login({ email, password })
+      .then(() => {
+        dispatch(toggleProfileLoader(false));
+         showSuccesNotify(SuccesCode.auth);
+      })
+      .catch((error: any) => {
+        dispatch(toggleProfileLoader(false));
+        showErrorNotify(error.code);
+        console.log(error.message);
+      });
   };
 }
 
@@ -58,17 +60,18 @@ export function RegisterRequest(
     getFirebase: Function
   ) => {
     dispatch(toggleProfileLoader(true));
-          const firebase = getFirebase();
-          firebase
-            .createUser({ email, password })
-            .then(() => {
-              dispatch(toggleProfileLoader(false));
-            })
-            .catch((error: any) => {
-              console.log(error.message);
-              dispatch(toggleProfileLoader(false));
-            });
-       
+    const firebase = getFirebase();
+    firebase
+      .createUser({ email, password })
+      .then(() => {
+        dispatch(toggleProfileLoader(false));
+        showSuccesNotify(SuccesCode.register);
+      })
+      .catch((error: any) => {
+        dispatch(toggleProfileLoader(false));
+        showErrorNotify(error.code);
+        console.log(error.message);
+      });  
   };
 }
 
@@ -89,17 +92,18 @@ export function ResetPasswordRequest(email: string) {
     getFirebase: Function
   ) => {
     dispatch(toggleProfileLoader(true));
-          const firebase = getFirebase();
-          firebase
-            .resetPassword(email)
-            .then(() => {
-              firebase.logout();
-              dispatch(toggleProfileLoader(false));
-            })
-            .catch((error: any) => {
-              console.log(error);
-              dispatch(toggleProfileLoader(false));
-            });
+    const firebase = getFirebase();
+    firebase
+      .resetPassword(email)
+      .then(() => {
+        firebase.logout();
+        dispatch(toggleProfileLoader(false));
+      })
+      .catch((error: any) => {
+        dispatch(toggleProfileLoader(false));
+        showErrorNotify(error.code);
+        console.log(error);
+      });
   };
 }
 

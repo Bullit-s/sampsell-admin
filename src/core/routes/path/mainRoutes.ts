@@ -9,9 +9,9 @@ export const mainRoutes: Record<string, IRoute> = {
     title: "Раздачи",
     link: "/gifts",
   },
-  applications: {
+  offereds: {
     title: "Заявки на продажу",
-    link: "/applications",
+    link: "/offereds",
   },
   accounts: {
     title: "Аккаунты",
