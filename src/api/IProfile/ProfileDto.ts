@@ -1,6 +1,6 @@
 export interface IProfile {
   role?: string;
-  name?: string;
+  email?: string;
   isLoaded: boolean;
   isEmpty: boolean;
 }

@@ -9,6 +9,10 @@ export const mainRoutes: Record<string, IRoute> = {
     title: "Раздачи",
     link: "/gifts",
   },
+  addGift: {
+    title: "Раздачи",
+    link: "/add-gift",
+  },
   offereds: {
     title: "Заявки на продажу",
     link: "/offereds",

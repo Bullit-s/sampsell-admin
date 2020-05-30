@@ -1,9 +1,8 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
+import React from "react";
+import ReactDOM from "react-dom";
 import "./styles/ant-components.less";
-import { App } from './App';
-import * as serviceWorker from './serviceWorker';
+import { App } from "./App";
+import * as serviceWorker from "./serviceWorker";
 import { BrowserRouter } from "react-router-dom";
 import "firebase/auth";
 import "firebase/database";
@@ -12,9 +11,8 @@ import { ReactReduxFirebaseProvider, getFirebase } from "react-redux-firebase";
 import { applyMiddleware, compose, createStore } from "redux";
 import thunk from "redux-thunk";
 import { Provider } from "react-redux";
-import { rootReducer, } from "./core/redux/rootReducer";
+import { rootReducer } from "./core/redux/rootReducer";
 import { rrfConfig, firebaseConfig } from "./core/redux/config";
-
 
 declare global {
   interface Window {
@@ -29,7 +27,6 @@ const store = createStore(
   composeEnhancers(applyMiddleware(thunk.withExtraArgument(getFirebase)))
 );
 
-
 export const rrfProps = {
   firebase,
   config: rrfConfig,
@@ -38,7 +35,6 @@ export const rrfProps = {
 firebase.initializeApp(firebaseConfig);
 
 ReactDOM.render(
-
   <BrowserRouter>
     <Provider store={store}>
       <ReactReduxFirebaseProvider {...rrfProps}>
@@ -47,7 +43,7 @@ ReactDOM.render(
     </Provider>
   </BrowserRouter>,
 
-  document.getElementById('root')
+  document.getElementById("root")
 );
 
 // If you want your app to work offline and load faster, you can change
