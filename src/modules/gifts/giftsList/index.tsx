@@ -56,7 +56,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
   const save = async () => {
     try {
       const values = await form.validateFields();
-
       toggleEdit();
       handleSave({ ...record, ...values });
     } catch (errInfo) {
@@ -78,7 +77,12 @@ const EditableCell: React.FC<EditableCellProps> = ({
           },
         ]}
       >
-        <Input ref={inputRef} onPressEnter={save} onBlur={save} />
+        <Input
+          ref={inputRef}
+          onPressEnter={save}
+          onBlur={save}
+          maxLength={100}
+        />
       </Form.Item>
     ) : (
       <div
@@ -97,23 +101,46 @@ const EditableCell: React.FC<EditableCellProps> = ({
 interface IProps {
   gifts: IGiftsResponse[];
   handleDelete: (key: string) => void;
+  handleSave: (row: IDataSource) => void;
 }
 
-interface IDataSource extends IGift {
+export interface IDataSource {
   key: string;
+  id: number;
+  product: string;
+  date: string;
+  members: number;
+  winner?: React.ReactNode;
 }
 
-export const EditableTable: React.FC<IProps> = ({ gifts, handleDelete }) => {
+export const EditableTable: React.FC<IProps> = ({
+  gifts,
+  handleDelete,
+  handleSave,
+}) => {
   const dataSource: IDataSource[] = gifts.map(({ key, value }) => ({
     key,
     ...value,
+    members: value.members ? value.members.length : 0,
+    winner: value.winner ? (
+      <a
+        className="link"
+        href={`${value.winner.domain}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {`${value.winner.first_name} ${value.winner.last_name}`}
+      </a>
+    ) : (
+      ""
+    ),
   }));
 
   const columns = [
     {
       title: "Название",
       dataIndex: "product",
-      width: "30%",
+      width: "35%",
       editable: true,
     },
     {
@@ -124,14 +151,17 @@ export const EditableTable: React.FC<IProps> = ({ gifts, handleDelete }) => {
     {
       title: "Дата создания",
       dataIndex: "date",
+      width: "15%",
     },
     {
       title: "Победитель",
       dataIndex: "winner",
+      width: "15%",
     },
     {
       title: "Действия",
       dataIndex: "operation",
+      width: "10%",
       render: (_: any, record: IDataSource) =>
         dataSource.length > 0 ? (
           <>
@@ -162,17 +192,6 @@ export const EditableTable: React.FC<IProps> = ({ gifts, handleDelete }) => {
     },
   ];
 
-  //   handleSave = (row) => {
-  //     const newData = [...this.state.dataSource];
-  //     const index = newData.findIndex((item) => row.key === item.key);
-  //     const item = newData[index];
-  //     newData.splice(index, 1, {
-  //       ...item,
-  //       ...row,
-  //     });
-  //     this.setState({ dataSource: newData });
-  //   };
-
   const components = {
     body: {
       row: EditableRow,
@@ -186,12 +205,12 @@ export const EditableTable: React.FC<IProps> = ({ gifts, handleDelete }) => {
 
     return {
       ...col,
-      onCell: (record: IGift) => ({
+      onCell: (record: IDataSource) => ({
         record,
         editable: col.editable,
         dataIndex: col.dataIndex,
         title: col.title,
-        //   handleSave: this.handleSave,
+        handleSave,
       }),
     };
   });

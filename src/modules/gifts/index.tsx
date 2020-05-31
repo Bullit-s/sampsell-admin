@@ -1,7 +1,8 @@
 import React, { FC, useState } from "react";
 import styled from "astroturf";
 import { HeaderPage } from "../../common/components/layout/HeaderPage";
-
+import { IGiftsResponse } from "../../api/IGifts/IGiftsDto";
+import { IDataSource } from "./giftsList";
 import {
   useFirebaseConnect,
   isLoaded,
@@ -29,10 +30,21 @@ export const Gifts: FC = () => {
     ],
   };
   useFirebaseConnect(() => [query]);
-  const giftsList = useSelector((state) => state.firebase.ordered.gifts);
+  const giftsList: IGiftsResponse[] = useSelector(
+    (state) => state.firebase.ordered.gifts
+  );
 
   const handleAddGift = async () => {
-    const gift = { product: addForm.getFieldValue("product") };
+    const gift = {
+      id: giftsList[giftsList.length - 1].value.id + 1,
+      product: addForm.getFieldValue("product"),
+      date: new Date().toLocaleString("ru", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }),
+    };
+    console.log(gift);
     if (gift.product && gift.product.length > 20) {
       setLoading(true);
       return await firebase
@@ -53,11 +65,43 @@ export const Gifts: FC = () => {
     }
   };
 
-  const handleDelete = (key: string) => {
-    // const dataSource = [...this.state.dataSource];
-    // this.setState({
-    //   dataSource: dataSource.filter((item) => item.key !== key),
-    // });
+  const handleDelete = async (key: string) => {
+    setLoading(true);
+    return await firebase
+      .remove(`gifts/${key}`)
+      .then(() => {
+        setLoading(false);
+        showSuccesNotify();
+      })
+      .catch(() => {
+        showErrorNotify();
+        setLoading(false);
+      });
+  };
+
+  const handleSave = async (row: IDataSource) => {
+    const gift = giftsList.find(({ key }) => row.key === key)?.value;
+    if (gift && gift.product !== row.product) {
+      if (row.product.length > 20) {
+        setLoading(true);
+        return await firebase
+          .update(`gifts/${row.key}`, {
+            ...gift,
+            product: row.product,
+          })
+          .then(() => {
+            setLoading(false);
+            showSuccesNotify();
+          })
+          .catch(() => {
+            showErrorNotify();
+            setLoading(false);
+          });
+      } else {
+        showErrorNotify("", "Минимальная длинна названия 20 символов");
+        setLoading(false);
+      }
+    }
   };
 
   return (
@@ -72,7 +116,11 @@ export const Gifts: FC = () => {
       />
       <ContentWrapper>
         {isLoaded(giftsList) ? (
-          <EditableTable gifts={giftsList} handleDelete={handleDelete} />
+          <EditableTable
+            gifts={giftsList}
+            handleDelete={handleDelete}
+            handleSave={handleSave}
+          />
         ) : (
           <Spin />
         )}
@@ -87,7 +135,7 @@ export const Gifts: FC = () => {
             <Form.Item
               name="product"
               label="Название товара"
-              extra="(70 символов)"
+              // extra="(120 символов)"
               rules={[
                 {
                   required: true,
@@ -96,7 +144,7 @@ export const Gifts: FC = () => {
             >
               <Input
                 placeholder="Пример: Arizona Chandler: 15lvl | 500к | Titan VIP..."
-                maxLength={50}
+                maxLength={100}
               />
             </Form.Item>
           </Form>

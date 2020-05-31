@@ -6,6 +6,7 @@ export interface IGiftsResponse {
 }
 
 export interface IGift {
+  id: number;
   product: string;
   date: string;
   members: IVKUser[];

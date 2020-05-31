@@ -41,6 +41,7 @@ const LogoWrapper = styled.div`
   display: flex;
   justify-content: center;
 `;
+
 // const LogoTitle = styled(Title)`
 //   color: white !important;
 //  font-weight: 700;
