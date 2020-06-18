@@ -35,8 +35,9 @@ export const Gifts: FC = () => {
   );
 
   const handleAddGift = async () => {
+    const id = giftsList ? giftsList[giftsList.length - 1].value.id + 1 : 0;
     const gift = {
-      id: giftsList[giftsList.length - 1].value.id + 1,
+      id,
       product: addForm.getFieldValue("product"),
       date: new Date().toLocaleString("ru", {
         day: "numeric",
@@ -44,7 +45,6 @@ export const Gifts: FC = () => {
         year: "numeric",
       }),
     };
-    console.log(gift);
     if (gift.product && gift.product.length > 20) {
       setLoading(true);
       return await firebase
@@ -69,6 +69,22 @@ export const Gifts: FC = () => {
     setLoading(true);
     return await firebase
       .remove(`gifts/${key}`)
+      .then(() => {
+        setLoading(false);
+        showSuccesNotify();
+      })
+      .catch(() => {
+        showErrorNotify();
+        setLoading(false);
+      });
+  };
+
+  const handleComplete = async (item: IDataSource) => {
+    const index = Math.floor(Math.random() * Math.floor(item.countMembers));
+    const winner = item.members[index];
+    setLoading(true);
+    return await firebase
+      .set(`gifts/${item.key}/winner`, winner)
       .then(() => {
         setLoading(false);
         showSuccesNotify();
@@ -119,6 +135,7 @@ export const Gifts: FC = () => {
           <EditableTable
             gifts={giftsList}
             handleDelete={handleDelete}
+            handleComplete={handleComplete}
             handleSave={handleSave}
           />
         ) : (

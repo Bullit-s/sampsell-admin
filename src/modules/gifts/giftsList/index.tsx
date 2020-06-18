@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect, useRef } from "react";
 import { Table, Input, Button, Popconfirm, Form } from "antd";
 import { IGift, IGiftsResponse } from "../../../api/IGifts/IGiftsDto";
 import { GiftOutlined, DeleteOutlined } from "@ant-design/icons";
+import { IVKUser } from "../../../api/VK/VKLoginResponse";
 
 const EditableContext = React.createContext<any>("");
 
@@ -101,6 +102,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
 interface IProps {
   gifts: IGiftsResponse[];
   handleDelete: (key: string) => void;
+  handleComplete: (item: IDataSource) => void;
   handleSave: (row: IDataSource) => void;
 }
 
@@ -109,32 +111,36 @@ export interface IDataSource {
   id: number;
   product: string;
   date: string;
-  members: number;
+  members: IVKUser[];
+  countMembers: number;
   winner?: React.ReactNode;
 }
 
 export const EditableTable: React.FC<IProps> = ({
   gifts,
+  handleComplete,
   handleDelete,
   handleSave,
 }) => {
-  const dataSource: IDataSource[] = gifts.map(({ key, value }) => ({
-    key,
-    ...value,
-    members: value.members ? value.members.length : 0,
-    winner: value.winner ? (
-      <a
-        className="link"
-        href={`${value.winner.domain}`}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {`${value.winner.first_name} ${value.winner.last_name}`}
-      </a>
-    ) : (
-      ""
-    ),
-  }));
+  const dataSource: IDataSource[] = gifts
+    ? gifts.map(({ key, value }) => ({
+        key,
+        ...value,
+        members:
+          value.members && Object.values(value.members).map((item) => item),
+        countMembers: value.members ? Object.keys(value.members).length : 0,
+        winner: value.winner ? (
+          <a
+            className="link"
+            href={`https://vk.com/id${value.winner.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {`${value.winner.first_name} ${value.winner.last_name}`}
+          </a>
+        ) : null,
+      }))
+    : [];
 
   const columns = [
     {
@@ -145,7 +151,7 @@ export const EditableTable: React.FC<IProps> = ({
     },
     {
       title: "Кол-во участников",
-      dataIndex: "members",
+      dataIndex: "countMembers",
       width: "10%",
     },
     {
@@ -169,7 +175,7 @@ export const EditableTable: React.FC<IProps> = ({
               <Popconfirm
                 icon={<GiftOutlined />}
                 title="Завершить раздачу?"
-                onConfirm={() => handleDelete(record.key)}
+                onConfirm={() => handleComplete(record)}
               >
                 <Button key={record.key} type="link">
                   Завершить
